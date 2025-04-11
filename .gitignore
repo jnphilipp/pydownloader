@@ -3,6 +3,9 @@ __pycache__/
 .mypy_cache/
 venv
 *.pyc
+build/
+dist/
+pydownloader.egg-info/
 
 # SublimeText
 *.sublime-project
