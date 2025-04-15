@@ -33,16 +33,17 @@ class Provider:
         """Download the given URL to the target directory using the optional name."""
         if name is None:
             name = url.split("/")[-1]
-        r = requests.get(url, stream=True)
-        if r.status_code == requests.codes.ok:
-            if not target_dir.exists():
-                target_dir.mkdir()
-            with open(target_dir / name, "wb") as f:
-                for chunk in r.iter_content(chunk_size=1024):
-                    f.write(chunk)
-            logging.info("Downloaded successfully.")
-        else:
-            r.raise_for_status()
+        if not target_dir.exists():
+            target_dir.mkdir()
+        elif (target_dir / name).exists():
+            raise RuntimeError("File already exists.")
+        with requests.get(url, stream=True) as r:
+            if r.status_code == requests.codes.ok:
+                with open(target_dir / name, "wb") as f:
+                    for chunk in r.iter_content(chunk_size=2**20):
+                        f.write(chunk)
+                logging.info("Downloaded successfully.")
+        r.raise_for_status()
 
     def match(self, url: str) -> dict[str, str] | None:
         """Check wether this provider is a match for the given URL."""
