@@ -81,6 +81,11 @@ def main():
         default=xdg_config_home() / __app_name__,
         help="path to config dir.",
     )
+    parser.add_argument(
+        "--download-dir",
+        type=lambda p: Path(p).absolute(),
+        help="download dir, overrides config.",
+    )
 
     parser.add_argument("URLS", nargs="+", help="URLs to download.")
 
@@ -121,14 +126,15 @@ def main():
     )
 
     settings = Settings.from_file(args.config_dir / "config.json")
+    download_dir = args.download_dir if args.download_dir else settings.download_dir
     for url in args.URLS:
         for k, provider in settings.providers.items():
             if provider.match(url) is not None:
                 provider.download(
                     url,
                     (
-                        (settings.download_dir / k)
+                        (download_dir / k)
                         if settings.use_provider_subdir
-                        else settings.download_dir
+                        else download_dir
                     ),
                 )
